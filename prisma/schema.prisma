@@ -13,11 +13,9 @@ datasource db {
 // NextAuth Schema
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String @unique
-  email              String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@unique([email])
+  id                 String  @id @default(cuid())  
+  email              String @unique
+  user User?  
 }
 
 
@@ -25,11 +23,8 @@ model Account {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  bio           String? @db.Text
-  age           Int?
-  email         String?   @unique
-  emailVerified DateTime?
+  accountId     String     @unique
+  email         String   @unique  
   image         String?
-  account      Account?  
+  account      Account @relation(fields: [accountId], references: [id], onDelete: Cascade)  
 }
-
