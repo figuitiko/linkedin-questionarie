@@ -1,7 +1,6 @@
 import type { IncomingHttpHeaders } from 'http'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { WebhookRequiredHeaders } from 'svix'
-import type { WebhookEvent } from '@clerk/nextjs/server'
 import { Webhook } from 'svix'
 import { createAccount } from '@/lib/user.action'
 
@@ -51,6 +50,7 @@ export default async function handler (
     console.log(`User ${id} was ${eventType}`)
     res.status(201).json({})
   }
+  res.status(200).json({ message: 'ok' })
 }
 
 type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
