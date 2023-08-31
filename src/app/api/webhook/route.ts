@@ -15,7 +15,7 @@ type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
 }
 const webhookSecret: string | undefined = process.env.WEBHOOK_SECRET
 
-export default async function handler (
+export default async function POST (
   req: NextApiRequestWithSvixRequiredHeaders,
   res: NextApiResponse
 ) {
