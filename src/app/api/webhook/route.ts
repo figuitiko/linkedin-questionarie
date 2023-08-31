@@ -7,12 +7,12 @@ import { NextResponse } from 'next/server'
 
 type EventType = 'user.created' | 'user.updated' | 'user.deleted'
 interface Event {
-  data: Record<string, string | number | Array<Record<string, string>>>
+  data: Record<string, string | number | Record<string, string | number> | Array<Record<string, string>>>
   object: 'event'
   type: EventType
 }
 
-const webhookSecret: string | undefined = process.env.WEBHOOK_SECRET
+const webhookSecret: string | undefined = process.env.NEXT_CLERK_WEBHOOK_SECRET
 
 export const POST = async (req: Request) => {
   const payload = JSON.stringify(req.body)
@@ -50,7 +50,7 @@ export const POST = async (req: Request) => {
       email,
       id: ''
     })
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-base-to-string
     console.log(`User ${id} was ${eventType}`)
     return NextResponse.json({ message: 'User created' }, { status: 201 })
   }
