@@ -1,41 +1,43 @@
 import type { IncomingHttpHeaders } from 'http'
-import type { NextApiRequest, NextApiResponse } from 'next'
 import type { WebhookRequiredHeaders } from 'svix'
 import { Webhook } from 'svix'
 import { createAccount } from '@/lib/user.action'
+import { headers } from 'next/headers'
+import { NextResponse } from 'next/server'
 
 type EventType = 'user.created' | 'user.updated' | 'user.deleted'
 interface Event {
   data: Record<string, string | number | Array<Record<string, string>>>
   object: 'event'
   type: EventType
-};
-type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
-  headers: IncomingHttpHeaders & WebhookRequiredHeaders
 }
+
 const webhookSecret: string | undefined = process.env.WEBHOOK_SECRET
 
-export const POST = async (
-  req: NextApiRequestWithSvixRequiredHeaders,
-  res: NextApiResponse
-) => {
+export const POST = async (req: Request) => {
   const payload = JSON.stringify(req.body)
-  const headers = req.headers
+  const header = headers()
   // Create a new Webhook instance with your webhook secret
   if (webhookSecret === undefined) {
-    res.status(500).json({})
-    return
+    return NextResponse.json({ status: 400 })
   }
   const wh = new Webhook(webhookSecret)
 
   let evt: Event
+  const heads = {
+    'svix-id': header.get('svix-id'),
+    'svix-timestamp': header.get('svix-timestamp'),
+    'svix-signature': header.get('svix-signature')
+  }
   try {
     // Verify the webhook payload and headers
-    evt = wh.verify(payload, headers) as Event
+    evt = wh.verify(
+      JSON.stringify(payload),
+      heads as IncomingHttpHeaders & WebhookRequiredHeaders
+    ) as Event
   } catch (_) {
     // If the verification fails, return a 400 error
-    res.status(400).json({})
-    return
+    return NextResponse.json({ status: 400 })
   }
   const eventType = evt.type
   console.log(`Received event of type ${eventType}`)
@@ -50,7 +52,7 @@ export const POST = async (
     })
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.log(`User ${id} was ${eventType}`)
-    res.status(201).json({})
+    return NextResponse.json({ message: 'User created' }, { status: 201 })
   }
-  res.status(200).json({ message: 'ok' })
+  return NextResponse.json({ message: 'User created' }, { status: 201 })
 }
