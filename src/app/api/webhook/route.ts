@@ -15,10 +15,10 @@ type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
 }
 const webhookSecret: string | undefined = process.env.WEBHOOK_SECRET
 
-export default async function POST (
+export const POST = async (
   req: NextApiRequestWithSvixRequiredHeaders,
   res: NextApiResponse
-) {
+) => {
   const payload = JSON.stringify(req.body)
   const headers = req.headers
   // Create a new Webhook instance with your webhook secret
