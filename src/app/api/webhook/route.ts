@@ -12,14 +12,10 @@ interface Event {
   type: EventType
 }
 
-const webhookSecret: string | undefined = process.env.NEXT_CLERK_WEBHOOK_SECRET
-
 export const POST = async (req: Request) => {
-  await createAccount({
-    email: 'test@sample.com',
-    id: 'zaq123'
-  })
-  const payload = JSON.stringify(req.body)
+  const webhookSecret: string | undefined = process.env.NEXT_CLERK_WEBHOOK_SECRET
+
+  const payload = await req.json()
   const header = headers()
   // Create a new Webhook instance with your webhook secret
   if (webhookSecret === undefined) {
@@ -39,24 +35,22 @@ export const POST = async (req: Request) => {
       JSON.stringify(payload),
       heads as IncomingHttpHeaders & WebhookRequiredHeaders
     ) as Event
-  } catch (_) {
+  } catch (e) {
     // If the verification fails, return a 400 error
-    return NextResponse.json({ status: 400 })
+    return NextResponse.json({ error: JSON.stringify(e) }, { status: 404 })
   }
   const eventType = evt.type
   console.log(`Received event of type ${eventType}`)
+  console.error('evt Data', JSON.stringify(evt.data, null, 2))
   const { id } = evt.data
-  const { email_addresses: emailAddressArr } = evt.data
-  const [email] = emailAddressArr as unknown as string[]
-  console.log('Event data:', evt.data)
+  const email = (evt.data.email_addresses as Array<Record<string, string>>)?.[0].email_address
+  console.warn('Event data:', evt.data)
   if (eventType === 'user.created' || eventType === 'user.updated') {
     await createAccount({
       email,
-      id: ''
+      id: id as string
     })
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-base-to-string
-    console.log(`User ${id} was ${eventType}`)
-    return NextResponse.json({ message: 'User created' }, { status: 201 })
+    return NextResponse.json({ error: 'Not error user Created' }, { status: 201 })
   }
-  return NextResponse.json({ message: 'User out' }, { status: 201 })
+  return NextResponse.json({ error: 'Not event fired' }, { status: 200 })
 }
