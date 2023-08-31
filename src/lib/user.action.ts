@@ -15,7 +15,8 @@ export const createAccount = async (account: Account) => {
     throw error
   }
 }
-export const updateUser = async (user: User) => {
+
+export const updateUser = async (user: Pick<User, 'email' | 'accountId' | 'name' | 'image'>) => {
   const { email, name, image, accountId } = user
   const data = {
     email,

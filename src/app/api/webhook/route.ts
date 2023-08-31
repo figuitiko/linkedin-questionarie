@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders } from 'http'
 import type { WebhookRequiredHeaders } from 'svix'
 import { Webhook } from 'svix'
-import { createAccount } from '@/lib/user.action'
+import { createAccount, updateUser } from '@/lib/user.action'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -40,17 +40,20 @@ export const POST = async (req: Request) => {
     return NextResponse.json({ error: JSON.stringify(e) }, { status: 404 })
   }
   const eventType = evt.type
-  console.log(`Received event of type ${eventType}`)
-  console.error('evt Data', JSON.stringify(evt.data, null, 2))
-  const { id } = evt.data
+  const { id, first_name: name, image_url: image } = evt.data
   const email = (evt.data.email_addresses as Array<Record<string, string>>)?.[0].email_address
-  console.warn('Event data:', evt.data)
   if (eventType === 'user.created' || eventType === 'user.updated') {
-    await createAccount({
+    const account = await createAccount({
       email,
       id: id as string
     })
-    return NextResponse.json({ error: 'Not error user Created' }, { status: 201 })
+    await updateUser({
+      email,
+      name: name as string,
+      image: image as string,
+      accountId: account.id
+    })
+    return NextResponse.json({ status: 201 })
   }
-  return NextResponse.json({ error: 'Not event fired' }, { status: 200 })
+  return NextResponse.json({ status: 200 })
 }
