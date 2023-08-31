@@ -35,3 +35,6 @@ export const updateUser = async (user: User) => {
     throw error
   }
 }
+export const testAction = async (obj: any) => {
+  console.log(obj)
+}

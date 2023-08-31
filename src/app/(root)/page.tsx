@@ -1,9 +1,10 @@
-import { UserButton } from '@clerk/nextjs'
+import NavbarComponent from '@/components/share/navbar-component'
 
 export default function Home () {
   return (
     <div>
-      <UserButton afterSignOutUrl='/'/>
+      <h1>Home</h1>
+      <NavbarComponent />
     </div>
   )
 }
