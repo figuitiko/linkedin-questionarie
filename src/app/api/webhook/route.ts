@@ -10,7 +10,9 @@ interface Event {
   object: 'event'
   type: EventType
 };
-
+type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
+  headers: IncomingHttpHeaders & WebhookRequiredHeaders
+}
 const webhookSecret: string | undefined = process.env.WEBHOOK_SECRET
 
 export default async function handler (
@@ -51,8 +53,4 @@ export default async function handler (
     res.status(201).json({})
   }
   res.status(200).json({ message: 'ok' })
-}
-
-type NextApiRequestWithSvixRequiredHeaders = NextApiRequest & {
-  headers: IncomingHttpHeaders & WebhookRequiredHeaders
 }
