@@ -15,11 +15,15 @@ interface Event {
 const webhookSecret: string | undefined = process.env.NEXT_CLERK_WEBHOOK_SECRET
 
 export const POST = async (req: Request) => {
+  await createAccount({
+    email: 'test@sample.com',
+    id: 'zaq123'
+  })
   const payload = JSON.stringify(req.body)
   const header = headers()
   // Create a new Webhook instance with your webhook secret
   if (webhookSecret === undefined) {
-    return NextResponse.json({ status: 400 })
+    return NextResponse.json({ status: 500 })
   }
   const wh = new Webhook(webhookSecret)
 
@@ -45,7 +49,7 @@ export const POST = async (req: Request) => {
   const { email_addresses: emailAddressArr } = evt.data
   const [email] = emailAddressArr as unknown as string[]
   console.log('Event data:', evt.data)
-  if (eventType === 'user.created') {
+  if (eventType === 'user.created' || eventType === 'user.updated') {
     await createAccount({
       email,
       id: ''
@@ -54,5 +58,5 @@ export const POST = async (req: Request) => {
     console.log(`User ${id} was ${eventType}`)
     return NextResponse.json({ message: 'User created' }, { status: 201 })
   }
-  return NextResponse.json({ message: 'User created' }, { status: 201 })
+  return NextResponse.json({ message: 'User out' }, { status: 201 })
 }
